@@ -1,5 +1,6 @@
 # import libraries
 import twitter
+import config
 import os
 import json
 import errno
@@ -11,21 +12,24 @@ class TwiPy:
     tweets: list
 
     def __init__(self):
-        self.api = twitter.Api(consumer_key="YOUR_CONSUMER_KEY",
-                               consumer_secret="YOUR_CONSUMER_SECRET_KEY",
-                               access_token_key="ACCESS_KEY",
-                               access_token_secret="ACCESS_SECRET")
+        self.api = twitter.Api(consumer_key=config.TWITTER_CONFIG['consumer_key'],
+                               consumer_secret=config.TWITTER_CONFIG['consumer_secret'],
+                               access_token_key=config.TWITTER_CONFIG['access_token_key'],
+                               access_token_secret=config.TWITTER_CONFIG['access_token_secret'])
+
         self.tweets = []
 
     def search_tweets(self, query, count=100):
         if query == "":
             return False
 
-        return self.api.GetSearch(term=query, count=count)
+        return self.api.GetSearch(term=query, count=count, result_type="recent")
 
     def export_tweets(self, raw_tweets):
         output_filename = os.path.join(os.path.curdir, 'output', 'twitter', 'python_tweets.json')
+        tweets = defaultdict()
 
+        # Check for directory existence
         if not os.path.exists(os.path.dirname(output_filename)):
             try:
                 os.makedirs(os.path.dirname(output_filename))
@@ -33,11 +37,20 @@ class TwiPy:
                 if exc.errno != errno.EEXIST:
                     raise
 
-        with open(output_filename, 'a') as output_file:
+        # Load the current file in case of existence and having content
+        elif os.path.isfile(output_filename) and (os.path.getsize(output_filename) > 0):
+            with open(output_filename, 'r') as output_file:
+                # First append existing tweets to the tweet dictionary
+                tweets = dict(json.load(output_file))
 
-            tweets_list = dict((tweet.id, tweet.text) for tweet in raw_tweets if tweet.text != "")
+        # Append recent tweets to the output file
+        with open(output_filename, 'w') as output_file:
+            tweets.update({int(tweet.id): tweet.text for tweet in raw_tweets if tweet.text != ""})
 
-            output_file.write(json.dumps(tweets_list,
+            # Convert all keys to int before encoding in json - it helps following sort
+            tweets = {int(k): v for k, v in tweets.items()}
+
+            output_file.write(json.dumps(tweets,
                                          sort_keys=True,
                                          indent=4))
 
@@ -59,7 +72,6 @@ class TwiPy:
         labels_filename = os.path.join(os.path.curdir, 'output', 'twitter', 'python_classes.json')
         labels = self.import_tweets()
 
-
         for tweet_idx in self.tweets.keys():
             if tweet_idx in labels:
                 continue
@@ -80,6 +92,6 @@ if __name__ == '__main__':
     twipy = TwiPy()
     raw_tweets = twipy.search_tweets('python')
     twipy.export_tweets(raw_tweets)
-    twipy.import_tweets()
-    twipy.set_labels()
+    # twipy.import_tweets()
+    # twipy.set_labels()
 
