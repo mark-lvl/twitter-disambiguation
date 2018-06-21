@@ -83,7 +83,14 @@ class TwiPy:
             print('=' * 40)
             print(self.tweets[tweet_idx])
             print('=' * 40,'\n')
-            labels[tweet_idx] = int(input("Enter 0 or 1:"))
+            # Getting value from terminal input and evaluate
+            while True:
+                picked_label = input("Enter 0 or 1:")
+                if picked_label not in ["0", "1"]:
+                    print("Bad input, choose between [0: Not relevant, 1: Relevant]\n")
+                else:
+                    break
+            labels[tweet_idx] = int(picked_label)
 
             os.system('clear')
 
