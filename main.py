@@ -23,8 +23,18 @@ if __name__ == '__main__':
                          ('naive-bayes', BernoulliNB())
                          ])
 
-    scores = cross_val_score(pipeline, tweets['Tweet'], tweets['Label'], scoring='f1')
-    print("Score: {:.3f}".format(np.mean(scores)))
+    # scores = cross_val_score(pipeline, tweets['Tweet'], tweets['Label'], scoring='f1')
+    # print("Score: {:.3f}".format(np.mean(scores)))
 
+    model = pipeline.fit(tweets['Tweet'], tweets['Label'])
 
+    nb = model.named_steps['naive-bayes']
+    feature_probabilities = nb.feature_log_prob_
+
+    top_features = np.argsort(-nb.feature_log_prob_[1])[:50]
+
+    dv = model.named_steps['vectorizer']
+
+    for i, feature_index in enumerate(top_features):
+        print(i, dv.feature_names_[feature_index], np.exp(feature_probabilities[1][feature_index]))
 
