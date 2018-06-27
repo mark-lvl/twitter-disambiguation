@@ -13,7 +13,10 @@ if __name__ == '__main__':
                                      description='Disambiguating the use of the given term  on Twitter stream.')
     parser.add_argument(
         'func',
-        choices=['fetch_tweets', 'label_tweets', 'build_model', 'list_top_words'],
+        choices=['fetch_tweets',
+                 'label_tweets',
+                 'build_model',
+                 'list_top_words'],
         help='The method name to call')
     parser.add_argument(
         '-p',
@@ -43,7 +46,7 @@ if __name__ == '__main__':
 
     # Constructing the model printing the score
     if args.func == 'build_model':
-        score = nbm.build_model(args.phrase)
+        score = nbm.build_model(args.phrase, True)
         if not score:
             print(Back.RED + Fore.BLACK + "There are unlabeled tweets, run label_tweets again.")
         else:

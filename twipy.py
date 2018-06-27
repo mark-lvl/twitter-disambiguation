@@ -59,7 +59,7 @@ class TwiPy:
             return False
 
         # Check for directory existence
-        tweets_filename = os.path.join(os.path.curdir, 'output', 'twitter', phrase + '_tweets.json')
+        tweets_filename = os.path.join(os.path.curdir, 'output', 'data', phrase + '_tweets.json')
         if not os.path.exists(os.path.dirname(tweets_filename)):
             try:
                 os.makedirs(os.path.dirname(tweets_filename))
@@ -76,7 +76,7 @@ class TwiPy:
                 tweets = dict(json.load(tweet_file))
 
         # Loading the label file and convert contents to dictionary
-        labels_filename = os.path.join(os.path.curdir, 'output', 'twitter', phrase + '_labels.json')
+        labels_filename = os.path.join(os.path.curdir, 'output', 'data', phrase + '_labels.json')
         labels = defaultdict(int)
         if os.path.exists(labels_filename):
             with open(labels_filename, 'r') as label_file:
