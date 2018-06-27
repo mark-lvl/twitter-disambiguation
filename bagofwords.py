@@ -11,4 +11,3 @@ class BagOfWords(TransformerMixin):
         return [{word: True
                  for word in nltk.word_tokenize(document)}
                 for document in X]
-

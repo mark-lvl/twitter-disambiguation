@@ -7,27 +7,19 @@ import re
 import errno
 from collections import defaultdict
 import pandas as pd
-from colorama import Fore, Back, Style, init
+from colorama import Fore, Back, init
 
 
 class TwiPy:
-    tweets: dict
-    labels: dict
-    tweets_export_filename: str
 
     def __init__(self):
-        # reseting color changes in prints
+        # resetting color changes in prints
         init(autoreset=True)
 
         self.api = twitter.Api(consumer_key=config.TWITTER_CONFIG['consumer_key'],
                                consumer_secret=config.TWITTER_CONFIG['consumer_secret'],
                                access_token_key=config.TWITTER_CONFIG['access_token_key'],
                                access_token_secret=config.TWITTER_CONFIG['access_token_secret'])
-
-        self.tweets = {}
-        self.labels = {}
-        # file to keep relevance labels of tweets
-        self.labels_filename = os.path.join(os.path.curdir, 'output', 'twitter', 'tweets_labels.json')
 
     def fetch_tweets(self, phrase, count=100, export=True):
         # format the query phrase
@@ -121,17 +113,19 @@ class TwiPy:
                                              sort_keys=True,
                                              indent=4))
 
-    def get_tweets(self):
-        tweets = pd.DataFrame.from_dict(self.tweets,
-                                        orient='index',
-                                        columns=['Tweet'])
+    def get_tweets(self, phrase):
 
-        labels = pd.DataFrame.from_dict(self.labels,
-                                        orient='index',
-                                        columns=['Label'])
+        tweets_filename, labels_filename, tweets, labels = self.file_loader(phrase)
 
-        full_df = pd.concat([tweets, labels], axis=1, sort=False)
+        tweets_df = pd.DataFrame.from_dict(tweets,
+                                           orient='index',
+                                           columns=['Tweet'])
+
+        labels_df = pd.DataFrame.from_dict(labels,
+                                           orient='index',
+                                           columns=['Label'])
+
+        full_df = pd.concat([tweets_df, labels_df], axis=1, sort=False)
 
         return full_df
-
 
