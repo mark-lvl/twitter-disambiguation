@@ -1,3 +1,4 @@
+![image](https://user-images.githubusercontent.com/119648/41982937-5a0daf54-7a35-11e8-83cc-c8f920919af0.png)
 # Introduction
 This application is about **disambiguating** terms in social media using the **Naive Bayes** algorithm, which is a powerful and surprisingly simple algorithm. The model which we're going to make is a baseline for text mining which can work reasonably well for a variety of datasets.
 
