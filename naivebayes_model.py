@@ -13,8 +13,8 @@ import errno
 
 def set_pipeline():
     return Pipeline([('bag-of-words', BagOfWords()),
-                    ('vectoring', DictVectorizer()),
-                    ('naive-bayes', BernoulliNB())])
+                     ('vectoring', DictVectorizer()),
+                     ('naive-bayes', BernoulliNB())])
 
 
 def export_model(phrase, model_context):
@@ -64,7 +64,7 @@ def build_model(phrase, export=False):
 
 def list_top_words(phrase):
     model = import_model(phrase)
-    
+
     # if model isn't exist then build and export the model
     if not model:
         model = build_model(phrase, True)
@@ -82,3 +82,23 @@ def list_top_words(phrase):
     return pd.DataFrame([{'feature': vector_matrix.feature_names_[feature_index],
                           'prob': np.exp(feature_probabilities[1][feature_index])}
                          for feature_index in top_features])
+
+
+def model_prediction(phrase, tweet_count=100):
+    # get test tweets
+    twipy = TwiPy()
+    tweets, tweets_filename = twipy.fetch_tweets(phrase, count=tweet_count, export=False)
+    test_tweets = pd.DataFrame.from_dict(tweets,
+                                         orient='index',
+                                         columns=['Tweet'])
+
+    # load model
+    model = import_model(phrase)
+    # if model isn't exist return false in order to set_label and construct model first
+    if not model:
+        return False
+
+    # add predicted label column to test_tweets dataset
+    test_tweets['Label'] = model.predict(test_tweets['Tweet'])
+
+    return test_tweets

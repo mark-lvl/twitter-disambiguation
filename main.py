@@ -16,7 +16,8 @@ if __name__ == '__main__':
         choices=['fetch_tweets',
                  'label_tweets',
                  'build_model',
-                 'list_top_words'],
+                 'list_top_words',
+                 'predict'],
         help='The method name to call')
     parser.add_argument(
         '-p',
@@ -39,7 +40,12 @@ if __name__ == '__main__':
     twipy = TwiPy()
 
     if args.func == 'fetch_tweets':
-        twipy.fetch_tweets(args.phrase, args.count)
+        if not args.phrase:
+            print(Fore.RED + 'use -p option to set phrase.')
+        # fetch tweets from api
+        tweets, tweets_filename = twipy.fetch_tweets(args.phrase, args.count)
+        print(Back.GREEN + Fore.BLACK + '{} tweets exported in {} successfully.'.format(len(tweets),
+                                                                                        tweets_filename))
 
     if args.func == 'label_tweets':
         twipy.disambiguate_tweets(args.phrase)
@@ -54,5 +60,10 @@ if __name__ == '__main__':
 
     if args.func == 'list_top_words':
         print(nbm.list_top_words(args.phrase))
+
+    if args.func == 'predict':
+        if not args.phrase:
+            print(Fore.RED + 'use -p option to set phrase.')
+        print(nbm.model_prediction(args.phrase, args.count))
 
 

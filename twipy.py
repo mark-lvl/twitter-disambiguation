@@ -7,15 +7,12 @@ import re
 import errno
 from collections import defaultdict
 import pandas as pd
-from colorama import Fore, Back, init
 
 
 class TwiPy:
 
     def __init__(self):
-        # resetting color changes in prints
-        init(autoreset=True)
-
+        # config the twitter api
         self.api = twitter.Api(consumer_key=config.TWITTER_CONFIG['consumer_key'],
                                consumer_secret=config.TWITTER_CONFIG['consumer_secret'],
                                access_token_key=config.TWITTER_CONFIG['access_token_key'],
@@ -26,23 +23,25 @@ class TwiPy:
         phrase = re.findall("[a-zA-Z0-9-]+", phrase)
         phrase = phrase[0].lower()
 
-        if phrase == "":
-            print(Fore.RED + 'Tweet phrase is empty.')
-            return False
-
+        # fetch tweets from twitter api
         raw_tweets = self.api.GetSearch(term=phrase,
                                         count=count,
                                         result_type="recent",
                                         lang='en')
-        # if we don't want to export tweets we can terminate the function here and return fetched tweets
-        if not export:
-            return raw_tweets
 
+        processed_tweets = {int(tweet.id): tweet.text for tweet in raw_tweets if tweet.text != ""}
+
+        # if export set to false means return recent fetched tweets
+        if not export:
+            # set None for filename if export is off
+            return processed_tweets, None
+
+        # set file names
         tweets_filename, labels_filename, tweets, labels = self.file_loader(phrase)
 
         # Append recent fetched tweets to the tweets file
         with open(tweets_filename, 'w') as output_file:
-            tweets.update({int(tweet.id): tweet.text for tweet in raw_tweets if tweet.text != ""})
+            tweets.update(processed_tweets)
 
             # Convert all keys to int before encoding in json - it helps following sort
             tweets = {int(k): v for k, v in tweets.items()}
@@ -51,8 +50,7 @@ class TwiPy:
                                          sort_keys=True,
                                          indent=4))
 
-        print(Back.GREEN + Fore.BLACK + '{} tweets exported in {} successfully.'.format(len(tweets),
-                                                                                        tweets_filename))
+            return tweets, tweets_filename
 
     def file_loader(self, phrase):
         if not phrase:
