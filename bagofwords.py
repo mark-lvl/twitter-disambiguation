@@ -1,4 +1,4 @@
-import nltk
+from nltk.tokenize import TweetTokenizer
 from sklearn.base import TransformerMixin
 
 
@@ -8,6 +8,7 @@ class BagOfWords(TransformerMixin):
         return self
 
     def transform(self, X):
+        tokenizer = TweetTokenizer()
         return [{word: True
-                 for word in nltk.word_tokenize(document)}
+                 for word in tokenizer.tokenize(document)}
                 for document in X]
